@@ -1,0 +1,69 @@
+void testy()
+{
+    vector<int> rozmiary = {8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608};
+    const int powtorzenia=10;
+
+    fstream plik;
+    plik.open("wyniki.txt", ios::out);
+        if (!plik.is_open())
+        {
+            cout << "Blad otwarcia pliku!" << endl;
+            return;
+        }
+
+    // Naglówek w pliku
+    plik << "ile elementow, ktory test, czy git posortowane" << endl;
+
+
+    int liczbatestow = rozmiary.size() * powtorzenia;
+    cout << "laczna liczba testow: " << liczbatestow << endl;
+    cout << "n\t\tpowt.\tczas[ms]\tporownania\tprzypisania\tpostep" << endl;
+
+    int aktualnytest=0;
+
+
+        for (int n : rozmiary)
+        {
+
+            for(int p=0; p<powtorzenia; p++)
+            {
+                aktualnytest++;
+                float postep=(float)aktualnytest/liczbatestow*100;
+                cout << n << "\t\t" << p + 1 << "\t";
+
+                long int* tablica = losowedane(n);
+
+                porownania = 0;
+                przypisania = 0;
+
+                auto start = high_resolution_clock::now();
+                quicksort(tablica, 0, n-1);
+                auto end = high_resolution_clock::now();
+
+                auto czas = duration_cast<milliseconds>(end - start);
+
+                bool poprawne = true;
+                for (int i = 1; i < n; i++)
+                {
+                    if (tablica[i] < tablica[i-1])
+                    {
+                        poprawne = false;
+                        break;
+                    }
+                }
+                cout << czas.count() << "\t\t" << porownania << "\t\t" << przypisania << "\t\t" << (int)postep << "%" << endl;
+                if(p+1==1) {plik << n << " "  << p+1 << " " << (poprawne ? "TAK" : "NIE") << endl;}
+                plik << czas.count() << endl;
+                plik << porownania << endl;
+                plik << przypisania << endl;
+
+
+                delete[] tablica;
+            }
+            cout << endl;
+        }
+
+    }
+
+
+

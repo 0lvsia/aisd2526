@@ -1,0 +1,392 @@
+\documentclass{article}
+\usepackage[english,polish]{babel}
+\usepackage{polski}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup[lstlisting]{labelformat=empty}
+\usepackage{xcolor}
+\usepackage{}
+\usepackage{graphicx} % Required for inserting images
+
+\title{\Huge Algorytmy i struktury danych \\ sprawozdanie z laboratorium nr 2}
+\author{\huge Aleksandra Cichecka \\ \Large numer albumu: 287362}
+\date{\Large Listopad 2025}
+
+\renewcommand*\contentsname{Spis tresci}
+
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+
+\lstdefinestyle{mystyle}{  
+    commentstyle=\color{gray},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C++                   
+}
+\lstset{style=mystyle}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Wstęp}
+
+\indent W dokumencie zawarta jest analiza kilku wybranych algorytmów sortowania.  Celem pracy było zaimplementowanie algorytmów sortujących, a także ich wersji ze wskazanymi modyfikacjami. Dodatkowo została stworzona własna lista dla której zaimplementowano również działający insertion sort. Algorytmy na których się skupimy to:
+
+\begin{itemize}
+\item QUICK SORT z modyfikacją polegającą na dzieleniu tablicy przy pomocy dwóch elementów, na trzy części
+\item RADIX SORT, który sortuje liczby naturalne względem dowolnej podstawy d, z modyfikacją która poprawnie sortuje liczby ujemne
+\item BUCKET SORT z modyfikacją, która sortuje dowolne dane wejściowe, a nie tylko (0,1] jak w przypadku klasycznej wersji
+\begin{itemize}
+\item W tym algorytmie dodatkowo został użyty algorytm insertion sort, który działa na listach
+\end{itemize}
+\end{itemize}
+Przeprowadzone zostały także testy, które dzięki którymi można porównać efektywność algorytmów.
+
+\section{Quick Sort}
+
+\subsection{Opis działania algorytmu}
+
+Quick Sort jest algorytmem sortowania, który działa na zasadzie "dziel i zwyciężaj". Z tablicy wybiera się element rozdzielający, po czym tablica jest dzielona na dwa fragmenty. Do pierwszego fragmentu przenoszone są wszystkie elementy nie większe od rozdzielającego, a do drugiego fragmentu wszystkie większe. Potem sortuje się osobno początkową i końcową część tablicy. Rekursja kończy się gdy kolejny fragment uzyskany z podziału zawiera pojedynczy element, jako że jednoelementowa tablica nie wymaga sortowania.
+
+Zmodyfikowana wersja polega na dzieleniu tablicy na trzy części używając dwóch punktów odniesienia. Są nimi pierwszy oraz ostatni element tablicy. Jeżeli pierwszy jest większy od drugiego to są zamieniane. Tablica podzielona jest na elementy mniejsze od pierwszego punktu, elementy wieksze od drugiego punktu oraz elementy pomiedzy dwoma punktami.  
+
+\subsection{Fragment kodu}
+
+\begin{lstlisting}[caption={Inicjalizacja punktów odniesienia w zmodyfikowanej wersji, zapewnia że zawsze mamy uporządkowaną parę punktów.}]
+  if(t[dol]>t[gora])
+{
+    swap(t[dol], t[gora]);
+    przypisania+=3;
+}
+long liczba1=t[dol]; //mniejszy punkt odniesienia
+long liczba2=t[gora]; //wiekszy punkt odniesienia
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Jednoczesne obsługiwanie trzech przedziałów wartości}]
+   while(i<=prawy)
+    {
+        if(t[i]<liczba1)
+        {
+            swap(t[i], t[lewy]);
+            lewy++;
+        } else 
+        {
+            if(t[i]>liczba2)
+            {
+                while(t[prawy]>liczba2 && i<prawy) prawy--;
+            }       
+                swap (t[i], t[prawy]);
+
+                if(t[i]<liczba1)
+                {
+                    swap(t[i], t[lewy]);
+                    lewy++;
+                }
+            }
+    }
+\end{lstlisting}
+
+\begin{lstlisting}[caption={}]
+  
+\end{lstlisting}
+
+\section{Radix Sort}
+
+\subsection{Opis działania algorytmu}
+
+Radix Sort to algorytm sortowania pozycyjnego, który sortuje elementy względem konkretnej cyfry od najmniej znaczących do najbardziej znaczących pozycji. Algorytm wykorzystuje sortowanie przez zliczanie jako procedurę pomocniczą do sortowania względem poszczególnych cyfr. 
+
+Kluczowym parametrem jest podstawa liczbowa (d), która określa system liczbowy, w którym operujemy. Wybór podstawy wpływa na liczbę iteracji i na wydajność. Mniejsza podstawa oznacza więcej cyfr do posortowania, ale mniejsze zbiory do zliczania. W przypadku wersji zmodyfikowanej nasz zakres wynosi 2*d podczas gdy w klasycznej wersji jest to poprostu d.
+
+Sortowanie przez zliczanie działa w trzech krokach: 
+\begin{enumerate}
+    \item Zlicza wystąpienia konkretnych cyfr 
+    \item Przekształca zliczenia w pozycje końcowe
+    \item Wstawia elementy w prawidłowe miejsce
+\end{enumerate}
+
+W klasycznej wersji Radix Sort działa jedynie dla liczb nieujemnych. Znajduje wartość maksymalną, a następnie sortuje elementy cyfra po cyfrze za pomocą sortowania przez zliczanie, zaczynając od najmniej znaczącej aż do najbardziej znaczącej.
+
+W zmodyfikowanej wersji, która działa również dla liczb ujemnych dodatkowo do wartości maksymalnej znajduje te minimalną. Nowym krokiem jest także przesunięcie wartości w górę tak aby najmniejsza liczba była równa 0.  Następnie sortuje cyfra po cyfrze z wykrywaniem ostatniej cyfry. Na koniec przywraca oryginalne wartości poprzez przesunięcie wartości w dół.
+
+\subsection{Fragment kodu}
+
+\begin{lstlisting}[caption={Iteracja od końca gwarantuje stabilność sortowania. Elementy o tej samej wartości zachowują względną kolejność. Jest to kluczowy moment w sortowaniu przez zliczanie.}]
+    //iteracja od konca
+    for(int i=n-1; i>=0; i--)
+    {
+        int cyfra = (t[i]/e)%d;
+        b[c[cyfra]-1]=t[i]; // element na wlasciwej pozycji
+        c[cyfra]--; //zmniejsza licznik dla danej cyfry
+    }
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Kluczowe przesunięcie w zmodyfikowanej wersji, aby działały liczby ujemne.}]
+    //jesli sa ujemne to dodatkowo przesuwa
+    if(mins<0)
+    {
+        int przesuniecie = -mins;
+        for(int i=0; i<n; i++)
+        {
+            t[i]+=przesuniecie;
+        }
+        maks+=przesuniecie;
+    }
+\end{lstlisting}
+
+
+\section{Insertion Sort na listach}
+
+\subsection{Opis działania algorytmu}
+Program tworzy listę jednokierunkową z danych wejściowych, sortuje ją algorytmem Insertion Sort, a następnie wyświetla posortowaną listę. Robi to poprzez stworzenie nowej posortowanej listy. Wybiera jeden element z nieposortowanej i wstawia go w prawidłowe miejsce do posortowanej tablicy.
+
+\subsection{Opis implementacji listy jednokierunkowej}
+Zaimplementowana została lista jednokierunkowa. Składa się ona z węzłów (Node). 
+
+\begin{lstlisting}[caption={Klasa Node jest pojedynczym elementem listy. Przechowuje ona wartość oraz wskaźnik na następny element w polu next. Konstruktor tworzy nowy węzeł w pamięci, inicjalizuje pole data podaną wartością oraz ustawia next na nullptr. }]
+ class Node
+{
+public:
+    int data; // wartosc elementu
+    Node* next; //wskanzik na nastepny elelment
+
+    Node(int value)
+    {
+        data=value; //przypisanie wartosci do elementu
+        next=nullptr; //ze nie ma nastpenego
+    }
+
+}; 
+
+\end{lstlisting}
+
+\vspace{4mm} 
+
+\begin{lstlisting}[caption={implementacja klasy Lista}]
+class Lista
+{
+public:
+    Node* head; //wskaznik na poczatek listy
+    int size; //rozmiar listy
+
+    Lista()
+    {
+        head=nullptr;
+        size=0;
+    } //ze na poczatku pusta i rozmiar 0
+}; 
+\end{lstlisting}
+
+\vspace{4mm} 
+
+Klasa posiada 3 funkcje. Append która odpowiada za dodawania na koniec, Insert, która wstawia element w dowolne miejsce, a także Display, która wyświetla listę.
+
+\vspace{4mm} 
+
+\begin{lstlisting}[caption={Funkcja append. Tworzy nowy węzeł z podaną wartością i jeśli lista jest pusta, to nowy element staje się pierwszym elementem listy. Jeżeli nie jest pusta to przechodzimy przez wszystkie elementy aż do ostatniego i dopisujemy nowy element na końcu.}]
+     void append(int value)
+    {
+        Node* newNode = new Node(value); //tworzy nowy element
+
+        if(head==nullptr) //ze jesli pusta to nowy jest poczatkiem
+        {
+            head=newNode;
+        } else //inaczej przechodzi do ostatniego elementu
+        {
+            Node* temp=head;
+            while(temp->next) //szuka gdzie next jest nullptr puste
+            {
+                temp=temp->next; //idzie do kolejnego
+            }
+            temp -> next = newNode; //i dopisuje nowy na koneic
+        }
+    }
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Funkcja insert. Wstawia nowy element za wskazanym węzłem. Jeżeli przekazany wskaźnik jest pusty to nowy węzeł wstawiany jest na początek listy. Jego next wskazuje dotychczasowy head, a head zostaje ustawiony na nowy element. W innym przypadku nowy element wstawiany jest za węzłem.}]
+    void insert(Node* node, int value)
+    {
+        Node* newNode = new Node(value); //tworzy nowy elment
+
+        if(!node) //jesli pusty to na poczatek
+        {
+            newNode->next=head; //nowy elmenyt wkakuje na stary poczatek
+            head=newNode; //nowy elment jest nowym poczatkiem
+        } else //wstaiwanie za podanym elmeentem
+        {
+            newNode -> next = node -> next; //nowy na to co wskazywal stary
+            node -> next = newNode; //stary elemnt wkazuje na nowy
+        }
+    }
+   
+\end{lstlisting}
+
+\vspace{4mm} 
+
+\begin{lstlisting}[caption={Funkcja display. Przechodzi po liście i wypisuje wszystkie wartości elementów aż do wskaźnika nullptr.}]
+     void display()
+    {
+        Node* temp =head;
+        while(temp)
+        {
+            cout << temp->data << " ";
+            temp=temp->next;
+        }
+        cout << endl;
+    }
+\end{lstlisting}
+
+Ostatnim elementem listy jest destruktor, który zwalnia pamięć
+\begin{lstlisting}[caption={Destruktor}]
+    ~Lista()
+    {
+         while(head)
+      {
+           Node* temp=head;
+           head=head->next;
+           delete temp;
+       }      
+    }
+\end{lstlisting}
+
+\subsection{Fragmenty kodu Insertion Sort}
+
+\begin{lstlisting}[caption={Jeżeli tablica ma 0 lub 1 element to znaczy że jest już posortowana}]
+if (!lista.head || !lista.head->next)
+    {
+        return;
+    }
+\end{lstlisting}
+
+\vspace{4mm} 
+
+\begin{lstlisting}[caption={Szukanie miejsca do wstawienia elementu. Przechodzi przez posortowaną część listy szukając pierwszego elementu który jest większy bądź równy od aktualnego.}]
+while (posortowanacurrent && posortowanacurrent->data < current->data)
+        {
+            porownania++;
+            prev=posortowanacurrent; //zapamietuje obecny element
+            posortowanacurrent=posortowanacurrent->next;
+        }
+\end{lstlisting}
+
+\section{Bucket sort}
+
+\subsection{Opis działania algorytmu}
+
+Idea działania algorytmu sortowania kubełkowego jest taka, że zadany przedział liczb dzieli na k podprzedziałów o równej długości. Następnie przypisuje liczby z sortowanej tablicy do odpowiednich kubełków. Sortuje liczby w niepustych kubełkach. W zaimplementowanej wersji używamy do tego wyżej opisanego Insertion Sort działającego na listach. Potem wypisuje po kolei ich zawartość. W standardowej wersji przyjmuje się że sortowane liczby należa do przedziału od 0 do 1.
+
+Zmodyfikowana wersja różni się od klasycznej tym, że obsługuje dowolne liczby całkowite. Robi to poprzez przesunięcie wszystkich elementów, tak aby najmniejsza wartość równała się zero. Następnie skaluje je do przedziału [0,1), gdzie działa już jak klasyczny algorytm.
+
+\subsection{Fragment kodu}
+
+\begin{lstlisting}[caption={Mechanim skalowania wartości, przekształca dowolne liczby całkowite na format [0,1). Przesuwa wszystkie wartości tak aby najmniejsza stała się 0.}]
+double skala = (double)(t[i] - mins) / (maks - mins + 1);
+int ktorykubelek = int(n * skala);
+\end{lstlisting}
+
+\section{Opis testów}
+
+\subsection{dla Radix Sort}
+
+Testujemy klasyczny algorytm sortujący Radix Sort. Testujemy działanie programu dla różnych podstaw d. Testowane podstawy to: 2, 10, 16, 100, 256, 1000. Wykonujemy po 10 testów dla każdej wielkości od 8 elementów, rosnących wykładniczo x2 aż do 4194304 elementów. Program losuje liczby od 1 do 1000000, przypisuje je do tablicy, a następnie sortuje. Z 10 testów dla jednej wielkości, dla jednej podstawy, wyciągamy medianę, którą jest później analizowana. Analizowane wskaźniki to czas wykonania algorytmu, liczba porównań oraz liczba przypisań.
+
+\subsection{dla Quick Sort i Bucket Sort}
+
+Testujemy zarówno klasyczną wersje jak i zmodyfikowaną Quick Sort, a następnie porównujemy ją do zmodyfikowanej wersji Bucket Sort. Podobnie jak dla Radix Sort wykonujemy po 10 testów dla każdej wielkości od 8 elementów rosnących wykładniczo x2 aż do 4194304 elementów na losowych danych. Wyciągamy medianę, a następnie porównujemy wyniki, na takich samych wskaźnikach co w Radix Sort.
+
+\section{Testy i ich analiza}
+\subsection{Radix Sort dla rożnych podstaw d}
+
+\subsubsection{Czas}
+Do 4096 elementów tablicy, radix sort wykonuje się bardzo szybko niezależnie od podstawy d. Wszędzie wynosi blisko 0 milisekund.Przy większych ilościach elementów, czas przy podstawie d=2 zaczyna się powoli zwiększać. Znaczącą różnice widać przy elementach 16k+. Można zauważyć, że najwolniej działa algorytm o podstawie 2, a najszybciej ten o podstawie 1000
+
+\begin{table}[H]
+\hspace*{-2,5cm}
+\begin{tabular}{llllllllll}
+ & \textbf{16384} & \textbf{32768} & \textbf{65536} & \textbf{131072} & \textbf{262144} & \textbf{524288} & \textbf{1048576} & \textbf{2097152} & \textbf{4194304} \\
+\textbf{CZAS 2} & 5,5 & 11 & 22,5 & 45,5 & 98 & 195 & 401 & 838 & 1917 \\
+\textbf{CZAS 10} & 1 & 3,5 & 7 & 15 & 33 & 65 & 135 & 287,5 & 627,5 \\
+\textbf{CZAS 16} & 1 & 3 & 6 & 12 & 26 & 52,5 & 107,5 & 229 & 499 \\
+\textbf{CZAS 100} & 0 & 2 & 4,5 & 10 & 21 & 40 & 85 & 172,5 & 379 \\
+\textbf{CZAS 256} & 0 & 1 & 3 & 6,5 & 14 & 28 & 58 & 122 & 268 \\
+\textbf{CZAS 1000} & 0 & 0,5 & 3 & 6 & 14 & 28 & 55,5 & 118 & 256
+\end{tabular}
+\end{table}
+
+\includegraphics[scale=0.80]{1.png}
+
+\subsubsection{Porównania}
+
+Niezależnie od podstawy wszędzie jest taka sama liczba porównań. Zwiększa się ona jedynie wraz z zwiększeniem ilości elementów w tablicy.
+
+\subsubsection{Przypisania}
+
+Dla elementów od 8 do 128 najmniej przypisań ma algorytm o podstawie 10. Następnie do samego końca najmniej ma ich ten o podstawie 256, ale przy 4k elementach oraz więcej bliski jemu jest ten o podstawie 1000. A najwięcej zdecydowanie ma algorytm o podstawie 2. 
+Poniżej wykres dla przypisań gdzie widać znaczącą różnicę.
+
+\vspace{4mm} 
+\includegraphics[scale=0.80]{2.png}
+
+\subsubsection{Wnioski}
+Dla małych tablic (do 4096 elementów) wszystkie warianty Radix Sort sa bardzo szybkie. Przy większych rozmiarach widać, że ta o podstawie 2 jest najwolniejsza, a o podstawie 1000 najszybsza. Z uwagi na to że liczba porównań jest identyczna dla wszystkich podstaw możemy wysnuć wniosek, że różnica w czasie wykonywania pochodzą z innych operacji. Przypisań najwięcej ma podstawa 2, najmniej natomiast 256 oraz 1000. Najbardziej optymalną wersją jest ta o podstawie 256 bądź 1000, ponieważ różnice między nimi są niewielkie, a oferują najlepszy czas wykonania przy najmniejszej ilości przypisań. Zdecydowanie warto unikać podstawy 2.
+
+\subsection{Quick Sort i Bucket Sort}
+
+\subsubsection{Czas}
+
+Dla tablic małych i średnich, aż do 8k elementów, sortowanie wykonuje się w tempie bardzo szybkim. Nie została naliczona ani milisekunda. Dopiero przy 16k elementowych tablicach czas zaczyna się pojawiać. Quick Sort klasyczny jak i zmodyfikowany ma bardzo bliski czas działania aż do 52k elementów. Dla większych elementów zdecydowanie widać przewagę zmodyfikowanego sortowania. Przegrywa on jedynie w 4mln elementach tablicy dla której ma ponad 2,5 razy dłuższy czas niż standardowy. 
+Czas dla Bucket Sort jest najgorszy i w każdym przypadku przegrywa z sortowaniem szybkim. 
+
+\begin{table}[H]
+\hspace*{-2,5cm}
+\begin{tabular}{llllllllll}
+ & \textbf{32768} & \textbf{65536} & \textbf{131072} & \textbf{262144} & \textbf{524288} & \textbf{1048576} & \textbf{2097152} & \textbf{4194304} \\
+\textbf{CZAS QS BEZ MOD} & 4 & 9 & 19 & 39 & 79 & 162,5 & 335,5 & 688,5 \\
+\textbf{CZAS QS MOD} & 4 & 9 & 18,5 & 40 & 90 & 217 & 576 & 1751,5 \\
+\textbf{CZAS BS} & 12 & 18 & 53 & 164 & 614 & 2342,5 & 9163 & 36105,5
+\end{tabular}
+\end{table}
+
+\includegraphics[scale=0.80]{3.png}
+
+\subsubsection{Porównania}
+W przypadku porównań widać zdecydowaną przewagę Bucket Sorta nad sortowaniami szybkimi. Najwięcej porównań wykonuje zmodyfikowana wersja Quick Sort, a nieco mniej od niej klasyczna wersja. 
+
+\vspace{4mm} 
+\includegraphics[scale=0.80]{4.png}
+
+\subsubsection{Przypisania}
+
+Tak samo jak porównania, Bucket Sort wykonuje również najmniejsza liczbę przypisań. Jednak tutaj w przypadku Quick Sortów różnice nie są aż tak zauważalne.
+
+\vspace{4mm} 
+\includegraphics[scale=0.80]{5.png}
+
+\subsubsection{Wnioski}
+
+Pomimo najmniejszej liczby porównań i liczby przypisań, Bucket Sort ma najdłuższy czas wykonania. Jest to spowodowane użyciem list. Program musi skakać po całej pamięci za każdym razem gdy chce się dostać do następnego elementu. Dlatego w danych implementacjach najwydajniejszy jest algorytm standardowy Quick Sort. Wykonuje się najszybciej, przy stosunkowo małej liczbie porównań oraz liczbie przypisań. Przy powtarzaniu eksperymentu należałoby poprawić implementacje listy i wtedy jest szansa na inne wyniki.
+
+\section{Podsumowanie}
+Pokazano zaimplementowane programy, a także przeanalizowano testy, dzięki którymi można porównać działanie algorytmów. Wynika z nich, że dla Radix Sort najbardziej opłaca się wykorzystać wersję o podstawie 256 bądź 1000, a pomiędzy Bucket Sort, a Quick Sort najlepiej wybrać standardową implementacje sortowania szybkiego. Dodatkowo została rozpatrzona implementacja własnej listy, na której przeprowadzono Insertion Sort, którego później użyto w Bucket Sort.
+
+
+\end{document}

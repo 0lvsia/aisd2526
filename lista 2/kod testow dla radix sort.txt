@@ -1,0 +1,96 @@
+int* losowedane(int n, int maks=1000000)
+{
+    int* tablica = new int[n];
+
+    for(int i = 0; i < n; i++)
+    {
+        tablica[i] = std::rand()%maks;
+    }
+
+    return tablica;
+}
+
+void testy()
+{
+    vector<int> rozmiary = {8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304};
+    vector<int> podstawy = {2, 10, 16, 100, 256, 1000};
+
+    const int powtorzenia=10;
+
+    fstream plik;
+    plik.open("wyniki.txt", ios::out);
+        if (!plik.is_open())
+        {
+            cout << "Blad otwarcia pliku!" << endl;
+            return;
+        }
+
+    // Nagłówek w pliku
+    plik << "jaka podstawa, ile elementow, ktory test, czy git posortowane" << endl;
+
+
+    int liczbatestow = rozmiary.size() * podstawy.size() * powtorzenia;
+    cout << "laczna liczba testow: " << liczbatestow << endl;
+    cout << "d\t\tn\t\tpowt.\tczas[ms]\tporownania\tprzypisania\tpostep" << endl;
+
+    int aktualnytest=0;
+
+    for (int d : podstawy)
+    {
+        for (int n : rozmiary)
+        {
+
+            for(int p=0; p<powtorzenia; p++)
+            {
+                aktualnytest++;
+                float postep=(float)aktualnytest/liczbatestow*100;
+                cout << d << "\t\t" << n << "\t\t" << p + 1 << "\t";
+
+                int* tablica = losowedane(n);
+
+                porownania = 0;
+                przypisania = 0;
+
+                auto start = high_resolution_clock::now();
+                radix(tablica, n, d);
+                auto end = high_resolution_clock::now();
+
+                auto czas = duration_cast<milliseconds>(end - start);
+
+                bool poprawne = true;
+                for (int i = 1; i < n; i++)
+                {
+                    if (tablica[i] < tablica[i-1])
+                    {
+                        poprawne = false;
+                        break;
+                    }
+                }
+
+                 cout << czas.count() << "\t\t" << porownania << "\t\t" << przypisania << "\t\t" << (int)postep << "%" << endl;
+                plik << d << " " << n << " "  << p+1 << " " << (poprawne ? "TAK" : "NIE") << endl;
+                plik << czas.count() << endl;
+                plik << porownania << endl;
+                plik << przypisania << endl;
+
+
+                delete[] tablica;
+            }
+            cout << endl;
+        }
+
+    }
+    plik.close();
+    cout << "koniec";
+
+}
+
+int main()
+{
+    std::srand(std::time(nullptr));
+
+    testy();
+
+
+    return 0;
+}
