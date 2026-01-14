@@ -1,0 +1,37 @@
+cut rod
+
+MIERZYMY: czas wykonania dla roznych dlguosci pręta w milisekundach
+5 RODZAJOW CEN: takie same, losowe, rosnace, malejace, geoemtryczne
+DLUGOSCI PRETA: {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536}
+(dla naiwnej 2,4,8,16,20,24)
+
+robimy po 10 pomiarów kazdego typu i wyciągamy mediane
+nie uwzgledniamy odzyskiwania rozwiazan 
+
+
+LCS najdluzszy wspolny podciag
+
+MIERZYMY: czas wykonania dla różnych długości ciągów (oba taka sama dlugosc) 
+RODZAJE: losowe, identyczne, calkowicie rozne, czesciowo podobne (50%) 
+DLUGOSCI: 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536
+
+
+AS
+
+MIERZYMY: czas wykonania dla różnej liczby aktywności:
+RODZAJE: nie pokrywajace sie, calkowicie pokrywajace, losowe
+DLUGOSCI: 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072 
+
+tutaj wiekszosc ma 0 bo ten algorytm zalezy glownie od sortowania, a ja zliczam czas samego algorytmu 
+w kodzie zakladamy ze dane sa posortowane rosnaco i na tej zasadzie dziala 
+a potem przechodzi przez petle tylko raz 
+
+
+HUFFMAN:
+
+MIERZYMY: czas wykonania dla różnej długosci
+RODZAJE: równomierny, nierównomierny, skrajny, losowy 
+ROZMIARY: {16384, 32768, 65536, 131072,
+           262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432};
+
+mierzymy wszystko oprocz odzyskiwania kodu
